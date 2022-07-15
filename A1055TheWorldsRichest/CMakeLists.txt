@@ -3,4 +3,4 @@ project(TheWorldsRichest)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(TheWorldsRichest main.cpp)
+add_executable(A1055TheWorldsRichest main.cpp)
