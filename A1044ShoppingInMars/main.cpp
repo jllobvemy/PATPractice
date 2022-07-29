@@ -3,8 +3,6 @@ using namespace std;
 int N, M;
 vector<int> diamonds;
 vector<pair<int, int>> ans;
-
-
 int main() {
     cin >> N >> M;
     diamonds.reserve(N);
