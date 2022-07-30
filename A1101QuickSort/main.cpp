@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+// Accepted!
 using namespace std;
 int N;
 vector<int> nums;

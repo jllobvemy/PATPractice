@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+// Accepted!
 using namespace std;
 long long answer = 0;
 string PAT;
