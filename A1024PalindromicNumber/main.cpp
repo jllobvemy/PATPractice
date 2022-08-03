@@ -1,103 +1,97 @@
 #include <bits/stdc++.h>
+// Accepted!
 using namespace std;
 
-struct BigNum {
-    string number;
-    explicit BigNum(string&& s): number(s) {
+class BigNum {
+    vector<short> _number;
+public:
+    explicit BigNum(const string& s) {
+        for (const auto c: s) {
+            _number.push_back(static_cast<short>(c - '0'));
+        }
     }
-    BigNum(BigNum&& bigNum) noexcept : number(move(bigNum.number)) {}
-    BigNum(const BigNum& bigNum) noexcept = default;
-    BigNum() = default;
-    BigNum& operator=(BigNum&& other) {
-        number = move(other.number);
+    BigNum(const BigNum& o) {
+        for (const auto i: o._number) {
+            _number.push_back(i);
+        }
+    }
+    BigNum& operator=(const BigNum& o) {
+        _number.clear();
+        for (const auto i: o._number) {
+            _number.push_back(i);
+        }
         return *this;
     }
-
-    [[nodiscard]]
-    unique_ptr<BigNum> get_reverse() const {
-        auto ret = make_unique<BigNum>();
-        ret->number = number;
-        std::reverse(ret->number.begin(), ret->number.end());
-        return ret;
-    }
-
-    BigNum operator+(const BigNum& other) {
-        BigNum ret;
-        const string* other_ = &other.number;
-        if (this->number.size() >= other.number.size()) {
-            ret.number = this->number;
-        }
-        else {
-            ret.number = other.number;
-            other_ = &this->number;
-        }
-        auto char2num = [](char x) {
-            return static_cast<uint8_t>(x - '0');
-        };
-        auto num2char = [](uint8_t num) {
-            return static_cast<char>(num + '0');
-        };
-        auto it1 = ret.number.rbegin();
-        auto it2 = other_->rbegin();
-        uint8_t j = 0;
-        do {
-            int8_t tmp = char2num(*it1) + char2num(*it2);
-            tmp += j;
-            if (tmp > 9) j = 1;
-            else j = 0;
-            *it1 = num2char(tmp % 10);
-            it1++;
-            it2++;
-            if (it2 == other.number.rend()) {
-                if (it1 != ret.number.rend()) {
-                    *it1 += j;
-                }
-                else {
-                    ret.number.insert(ret.number.begin(), '1');
-                }
+    BigNum operator+(const BigNum& o) {
+        BigNum base = _number.size() > o._number.size() ? *this: o;
+        const BigNum& other = _number.size() > o._number.size() ? o: *this;
+        auto itbase = base._number.rbegin();
+        auto itother = other._number.rbegin();
+        while (true) {
+            *itbase += *itother;
+            itbase++;
+            itother++;
+            if (itother == other._number.rend()) {
                 break;
             }
-        } while(true);
-        return ret;
+        }
+        short carry = 0;
+        for (auto it = base._number.rbegin(); it != base._number.rend(); it++) {
+            *it += carry;
+            if (*it > 9)  {
+                carry = *it / 10;
+                *it %= 10;
+            }
+            else {
+                carry = 0;
+            }
+        }
+        if (carry > 0) {
+            base._number.insert(base._number.begin(), carry);
+        }
+        return base;
     }
-    friend ostream& operator<<(ostream& o, const BigNum& num) {
-        o << num.number;
+    friend bool isPalindromic(const BigNum& bigNum);
+    friend BigNum Reverse(const BigNum& bigNum);
+    friend ostream& operator<<(ostream& o, BigNum& bigNum) {
+        for (auto i: bigNum._number) {
+            cout << i;
+        }
         return o;
     }
-
 };
 
-bool is_palindromic(const BigNum& num) {
-    auto itbegin = num.number.begin();
-    auto itend = num.number.end() - 1;
+bool isPalindromic(const BigNum& bigNum) {
+    auto itbegin = bigNum._number.begin();
+    auto itend = bigNum._number.end() - 1;
     while (true) {
-        if (*itend == *itbegin) {
-            itbegin++;
-            itend--;
-            if (itend == itbegin) return true;
-        }
-        else {
+        if (*itbegin != *itend) {
             return false;
         }
+        itbegin++;
+        itend--;
+        if (itbegin >= itend) return true;
     }
-
 }
 
+BigNum Reverse(const BigNum& bigNum) {
+    BigNum ret = bigNum;
+    std::reverse(ret._number.begin(), ret._number.end());
+    while(*ret._number.begin() == 0) {
+        ret._number.erase(ret._number.begin());
+    }
+    return ret;
+}
 
 int main() {
     string s;
-    int N;
-    cin >> s >> N;
-    BigNum num(move(s));
-    int i;
-    BigNum tmp;
-    for (i = 0; i < N; ++i) {
-        tmp = num + *num.get_reverse();
-        if (is_palindromic(tmp)) {
-            break;
-        }
-        num = move(tmp);
+    int n;
+    cin >> s >> n;
+    BigNum b(s);
+    int step = 0;
+    while (step < n && !isPalindromic(b)) {
+        b = b + Reverse(b);
+        step++;
     }
-    cout << i << endl << tmp;
-    return 0;
+    cout << b << endl << step;
 }
