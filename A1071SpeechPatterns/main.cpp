@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+// Accepted!
 using namespace std;
 constexpr int dis = 'a' - 'A';
 bool endoffile = false;

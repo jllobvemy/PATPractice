@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+// Accepted!
 using namespace std;
 constexpr string_view NOTFOUND = "Not Found";
 
