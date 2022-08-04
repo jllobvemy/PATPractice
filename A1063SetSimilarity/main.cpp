@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+// Accepted!
 using namespace std;
 
 double Similarity(const vector<int>& a, const vector<int>& b) {
