@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+// Accepted!
 using namespace std;
 #define FAIL return false;
 stack<int> fixs;
