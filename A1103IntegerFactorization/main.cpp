@@ -6,7 +6,7 @@ vector<int> ans;
 vector<int> tmp;
 int anssum = 0;
 int N, K, P;
-auto fun = [](vector<int>& x){
+auto depow = [](vector<int>& x){
     for (auto &e: x) {
         e = pow(e, 1.0 / P);
     }
@@ -17,7 +17,7 @@ void FindFac(int index, int sum) {
     if ((sum == N && tmp.size() != K) || (sum != N && tmp.size() == K)) return;
     if (sum == N && tmp.size() == K) {
         auto acctmp = tmp;
-        fun(acctmp);
+        depow(acctmp);
         int acc = accumulate(acctmp.begin(), acctmp.end(), 0);
         if (anssum < acc) {
             ans = tmp;
@@ -52,7 +52,7 @@ int main() {
         cout << "Impossible" << endl;
         return 0;
     }
-    fun(ans);
+    depow(ans);
     cout << N << " =";
     bool first = true;
     for (auto &e: ans) {
