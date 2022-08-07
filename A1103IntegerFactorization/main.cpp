@@ -1,30 +1,43 @@
 #include <bits/stdc++.h>
-// Not Ac. 22/30
+// Accepted!
 using namespace std;
 vector<int> powtree;
-bool findanswer = false;
+vector<int> ans;
+vector<int> tmp;
+int anssum = 0;
 int N, K, P;
+auto fun = [](vector<int>& x){
+    for (auto &e: x) {
+        e = pow(e, 1.0 / P);
+    }
+};
 
-void FindFac(vector<int>& ans, int num, int powindex, int sum = 0) {
-    if (ans.size() >= K) return;
-    if (powindex >= powtree.size()) return;
-    if (findanswer) return;
-    if (sum < num) {
-        while (sum < num) {
-            sum += powtree[powindex];
-            ans.push_back(powtree[powindex]);
-            if (sum == num && ans.size() == K) {
-                findanswer = true;
-                return;
+void FindFac(int index, int sum) {
+    if (tmp.size() > K || sum > N || index >= powtree.size()) return;
+    if ((sum == N && tmp.size() != K) || (sum != N && tmp.size() == K)) return;
+    if (sum == N && tmp.size() == K) {
+        auto acctmp = tmp;
+        fun(acctmp);
+        int acc = accumulate(acctmp.begin(), acctmp.end(), 0);
+        if (anssum < acc) {
+            ans = tmp;
+            anssum = acc;
+        } else if (anssum == acc) {
+            for (int i = 0; i < K; i++) {
+                if (tmp[i] > ans[i]) {
+                    ans = tmp;
+                    break;
+                }
+                else if (tmp[i] < ans[i]){
+                    break;
+                }
             }
         }
-        while (sum > 0) {
-            if (findanswer) break;
-            sum -= powtree[powindex];
-            ans.pop_back();
-            FindFac(ans, num, powindex + 1, sum);
-        }
-    }
+    };
+    tmp.push_back(powtree[index]);
+    FindFac(index, sum + powtree[index]);
+    tmp.pop_back();
+    FindFac(index + 1, sum);
 }
 
 int main() {
@@ -34,52 +47,12 @@ int main() {
         int current = pow(i, P);
         powtree.push_back(current);
     }
-    vector<int> ans;
-    vector<vector<int>> res;
-    for (int i = 0; i < powtree.size(); i++) {
-        ans.clear();
-        FindFac(ans, N, i, 0);
-        if (findanswer) {
-            res.push_back(ans);
-            findanswer = false;
-        }
-    }
-    if (res.empty()) {
+    FindFac(0, 0);
+    if (ans.empty()) {
         cout << "Impossible" << endl;
         return 0;
     }
-    for (auto& r: res) {
-        auto fun = [](vector<int>& x){
-            for (auto &e: x) {
-                e = pow(e, 1.0 / P);
-            }
-        };
-        fun(r);
-    }
-    int max = -1;
-    for (const auto& v: res) {
-        int sum;
-        sum = accumulate(v.begin(), v.end(), 0);
-        if (sum > max) {
-            ans = v;
-            max = sum;
-        }
-        if (sum == max) {
-            auto judge = [](const vector<int>& a, const vector<int>& b){
-                for (int i = 0; i < a.size(); ++i) {
-                    if (a[i] > b[i]) {
-                        return true;
-                    }
-                    else if (a[i] < b[i]){
-                        return false;
-                    }
-                }
-            };
-            if (judge(ans, v)) {
-                ans = v;
-            }
-        }
-    }
+    fun(ans);
     cout << N << " =";
     bool first = true;
     for (auto &e: ans) {
@@ -91,6 +64,5 @@ int main() {
             cout << " + " << e << "^" << P;
         }
     }
-
     return 0;
 }
