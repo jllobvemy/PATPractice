@@ -6,20 +6,32 @@ struct Node {
     vector<int> children;
 };
 vector<Node> tree;
-vector<int> ans;
-int maxDepth = 0;
-void DFS(int root, int depth) {
-    ans[depth]++;
-    if (depth > maxDepth) maxDepth = depth;
-    for (auto i: tree[root].children) {
-        DFS(i, depth + 1);
+int ans = 0;
+int ansLevel = 0;
+void BFS(int root) {
+    queue<int> nodes;
+    nodes.push(root);
+    int level = 0;
+    while (!nodes.empty()) {
+        int size = nodes.size();
+        level++;
+        if (size > ans) {
+            ans = size;
+            ansLevel = level;
+        }
+        while (size--) {
+            root = nodes.front();
+            nodes.pop();
+            for (auto i: tree[root].children) {
+                nodes.push(i);
+            }
+        }
     }
 }
 
 int main() {
     cin >> N >> M;
     tree.resize(N + 1);
-    ans.resize(N + 1);
     for (int i = 0; i < M; ++i) {
         int cnode;
         cin >> cnode;
@@ -31,8 +43,7 @@ int main() {
             tree[cnode].children.push_back(child);
         }
     }
-    DFS(1, 0);
-    auto m = max_element(ans.begin(), ans.begin() + maxDepth + 2);
-    cout << *m << " " << m - ans.begin() + 1;
+    BFS(1);
+    cout << ans << " " << ansLevel;
     return 0;
 }
