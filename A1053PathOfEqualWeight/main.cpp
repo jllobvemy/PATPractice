@@ -28,7 +28,7 @@ void DFS(int root) {
             tmpsum -= tree[i].weight;
         }
 }
-bool cmp(vector<int>& a, vector<int>& b) {
+bool cmp(const vector<int>& a, const vector<int>& b) {
     int num = min(a.size(), b.size());
     for (int i = 0; i < num; ++i) {
         if (a[i] > b[i])
