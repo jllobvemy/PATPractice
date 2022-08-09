@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+// Accepted!
 using namespace std;
 struct Node {
     vector<int> children;
