@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-// Accepted!
+// Accepted! 并查集解法
 constexpr int MAXLEN = 3000;
 using namespace std;
 map<int, string> id2name;
