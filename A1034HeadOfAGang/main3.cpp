@@ -1,19 +1,14 @@
 #include <bits/stdc++.h>
-// Accepted! 邻接表 + DFS
+// Accepted! 邻接矩阵 + DFS
 using namespace std;
-constexpr int MAXLEN = 3000;
+constexpr int MAXLEN = 2050;
 map<int, string> id2name;
 map<string, int> name2id;
 int curID = 0;
 int N, T;
 array<int, MAXLEN> personTime;
 array<bool, MAXLEN> visited;
-struct Node {
-    int id = -1;
-    int time = -1;
-    Node(int id, int time): id(id), time(time) {}
-};
-vector<Node> Adj[MAXLEN];
+array<array<int, MAXLEN>, MAXLEN> G;
 
 int getId(const string& n) {
     if (name2id.find(n) == name2id.end()) {
@@ -39,18 +34,19 @@ int getPersonNum() {
 int curtPersonNum = 0;
 int curtGangTime = 0;
 int curtHead = -1;
-int prevNode = -1;
 
 void DFS(int v) {
+    if (!visited[v]) curtPersonNum++;
+    if (personTime[v] > personTime[curtHead]) curtHead = v;
     visited[v] = true;
-    curtPersonNum++;
-    for (auto& n: Adj[v]) {
-        if (prevNode == n.id) continue;
-        curtGangTime += n.time;
-        if (!visited[n.id]) {
-            if (personTime[n.id] > personTime[curtHead]) curtHead = n.id;
-            prevNode = v;
-            DFS(n.id);
+    for (int i = 0; i < getPersonNum(); i++) {
+        if (G[v][i] > 0) {
+            curtGangTime += G[v][i];
+            G[i][v] = 0;
+            G[v][i] = 0;
+            if (!visited[i]) {
+                DFS(i);
+            }
         }
     }
 }
@@ -63,7 +59,6 @@ void DFSTraverse() {
             curtHead = i;
             curtPersonNum = 0;
             curtGangTime = 0;
-            prevNode = i;
             DFS(i);
             if (curtPersonNum > 2 && curtGangTime > T) {
                 ans[getName(curtHead)] = curtPersonNum;
@@ -80,9 +75,8 @@ int main() {
         int id1 = getId(name1), id2 = getId(name2);
         personTime[id1] += t;
         personTime[id2] += t;
-        // 注意，代码虽AC，但下面两行实际上是不对的，如果出现重复的电话记录，应当累计，而非从后面添加记录
-        Adj[id1].emplace_back(id2, t);
-        Adj[id2].emplace_back(id1, t);
+        G[id1][id2] += t;
+        G[id2][id1] += t;
     }
     DFSTraverse();
     cout << ans.size() << endl;
@@ -92,5 +86,6 @@ int main() {
 
     return 0;
 }
+
 
 
