@@ -23,7 +23,7 @@ int BFS(int node) {
             for (int i = 1; i <= N; ++i) {
                 if (G[node][i] && !visited[i]) {
                     q.push(i);
-                    visited[i] = true;
+                    visited[i] = true; // Note: the index of the visited[] is i, not node!!!
                     ret++;
                 }
             }
