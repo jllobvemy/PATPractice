@@ -1,5 +1,16 @@
 #include <bits/stdc++.h>
 // Not ac. 25/30
+/*
+ * 可以尝试以下测试用例:
+ * 10 4 4 4
+ * 7 0 3 10
+ * 0 1 1
+ * 1 2 1
+ * 2 3 1
+ * 3 4 1
+ * 输出：
+ * 5 0->1->2->3->4 5
+ */
 constexpr int MAXLEN = 550;
 constexpr int INF = INT_MAX / 2 - 1;
 using namespace std;
