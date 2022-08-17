@@ -1,79 +1,73 @@
 #include <bits/stdc++.h>
-// ACCEPTED!!
+// Accepted!
 using namespace std;
-struct Score{
-    int score, location, localRank;
-    unsigned long  number;
-    Score(unsigned long n, int s, int l) : number(n), score(s), location(l) {}
-    bool operator<(const Score& s2) const {
-        if (this->score < s2.score) {
-            return false;
-        }
-        if (this->score == s2.score) {
-            if (this->number > s2.number) {
-                return false;
-            }
-            return true;
-        }
+struct Student {
+    string name;
+    int final_rank;
+    int local_number;
+    int local_rank;
+    int score;
+    Student(string n, int f, int ln, int lr): name(std::move(n)), final_rank(f), local_number(ln), local_rank(lr) {}
+    Student(string n, int score, int ln): score(score), name(std::move(n)), local_number(ln) {}
+};
+
+bool cmp_score(const Student& s1, const Student& s2) {
+    if (s1.score > s2.score) {
         return true;
     }
-};
-int N, TOTAL = 0;
-vector<Score> scoreList;
-vector<int> localRank;
-
-
+    else if (s1.score == s2.score) {
+        return s1.name < s2.name;
+    }
+    return false;
+}
 int main() {
-    cin >> N;
-    localRank.resize(N);
-    vector<int> localRankOff;
-    localRankOff.resize(N);
-
-    for (int i = 0; i < N; ++i) {
-        localRank[i] = 0;
-        localRankOff[i] = 0;
-    }
-    int loc = 1;
-    for (int i = 0; i < N; ++i) {
-        int K;
-        cin >> K;
-        for (int j = 0; j < K; ++j) {
-            unsigned long num;
-            short score;
-            cin >> num >> score;
-            scoreList.emplace_back(num, score, loc);
-            TOTAL++;
+    int K, N;
+    cin >> K;
+    vector<Student> studentstmp;
+    vector<Student> studentsAll;
+    for (int i = 0; i < K; ++i) {
+        cin >> N;
+        for (int j = 0; j < N; ++j) {
+            string name;
+            int score;
+            cin >> name >> score;
+            studentstmp.emplace_back(name, score, i + 1);
         }
-        loc++;
-    }
-    sort(scoreList.begin(), scoreList.end());
-    for (auto i = scoreList.begin(); i < scoreList.end(); ++i) {
-        i->localRank = localRank[i->location - 1] + 1;
-        if ([i, end = scoreList.end()](){
-            for (auto j = i + 1; j < end; ++j) {
-                if (i->location == j->location && i->score == j->score)
-                    return true;
+        sort(studentstmp.begin(), studentstmp.end(), cmp_score);
+        int rank = 1;
+        int offset = 1;
+        studentstmp.begin()->local_rank = 1;
+        for (auto it = studentstmp.begin() + 1; it != studentstmp.end(); it++) {
+            if (it->score == (it - 1)->score) {
+                it->local_rank = (it - 1)->local_rank;
+                offset++;
             }
-            return false;
-        }()) {
-            localRankOff[i->location - 1]++;
+            else {
+                it->local_rank = rank += offset;
+                offset = 1;
+            }
+        }
+        studentsAll.insert(studentsAll.end(), studentstmp.begin(), studentstmp.end());
+        studentstmp.clear();
+    }
+    sort(studentsAll.begin(), studentsAll.end(), cmp_score);
+    int rank = 1;
+    int offset = 1;
+    studentsAll.begin()->final_rank = 1;
+    for (auto it = studentsAll.begin() + 1; it != studentsAll.end(); it++) {
+        if (it->score == (it - 1)->score) {
+            it->final_rank = (it - 1)->final_rank;
+            offset++;
         }
         else {
-            localRank[i->location - 1] += localRankOff[i->location - 1] + 1;
-            localRankOff[i->location - 1] = 0;
+            it->final_rank = rank += offset;
+            offset = 1;
         }
     }
-    int rankOff = 0;
-    int currentRank = 1;
-    cout << TOTAL << endl;
-    for (auto i = scoreList.begin(); i < scoreList.end(); ++i) {
-        cout << i->number << " " << currentRank << " " << i->location << " " << i->localRank;
-        if (i + 1 != scoreList.end()) cout << endl;
-        if ((i + 1)->score == i->score) rankOff++;
-        else {
-            currentRank += rankOff + 1;
-            rankOff = 0;
-        }
+    cout << studentsAll.size() << endl;
+    for (auto& s: studentsAll) {
+        cout << s.name << " " << s.final_rank << " " << s.local_number << " " << s.local_rank << endl;
     }
-    return 0;
+
+
 }
