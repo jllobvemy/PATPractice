@@ -1,41 +1,68 @@
 #include <bits/stdc++.h>
-// not completed.
+// Accepted!
 using namespace std;
-double Cmax; // tank capacity
-double D; // distance
-double Davg; // distance/unit
+double CMax, D, Dave;
 int N;
-map<int, float> stations;
+
+struct Station {
+    double dis;
+    double price;
+    bool operator<(const Station& other) const {
+        return dis < other.dis;
+    }
+    Station(int dis, double price): price(price), dis(dis) {}
+};
 
 int main() {
-    cin >> Cmax >> D >> Davg >> N;
-    double maxDistance = Cmax * Davg;
+    const char* format = "The maximum travel distance = %.2f";
+    char buf[100];
+    cin >> CMax >> D >> Dave >> N;
+    vector<Station> q;
+    q.emplace_back(D, 0);
     for (int i = 0; i < N; ++i) {
-        float price;
-        int dis;
-        cin >> price >> dis;
-        stations.insert({dis, price});
+        double p;
+        double d;
+        cin >> p >> d;
+        q.emplace_back(d, p);
     }
-    float currentPrice = 0.0f;
-    double currentDis = 0;
-    double currentGas = 0;
-    while (currentDis < D) {
-
+    sort(q.begin(), q.end());
+    if (q.front().dis != 0) {
+        sprintf(buf, format, 0);
+        cout << buf;
+        return 0;
     }
-    for (auto a = stations.begin(); a != stations.end(); a++) {
-        int dis = 0;
-        for (auto b = next(a); b != stations.end(); ++b) {
-            if (b->first - a->first > maxDistance) {
-                currentDis += currentGas * Davg;
-                goto end;
+    double curtPosi = 0, maxDis = 0, curtPrice = q[0].price, totalPrice = 0, leftDis = 0;
+    while (curtPosi < D) {
+        maxDis = curtPosi + Dave * CMax;
+        double minPrice = DBL_MAX, minPriceDis;
+        bool flag = false;
+        for (int i = 1; q[i].dis <= maxDis; ++i) {
+            if (q[i].dis <= curtPosi) continue;
+            if (q[i].price <= curtPrice) {
+                totalPrice += (q[i].dis - curtPosi - leftDis) * curtPrice / Dave;
+                leftDis = 0;
+                curtPrice = q[i].price;
+                curtPosi = q[i].dis;
+                flag = true;
+                break;
             }
-            if (a->second > b->second) {
-
+            if (q[i].price < minPrice) {
+                minPrice = q[i].price;
+                minPriceDis = q[i].dis;
             }
         }
-
+        if (!flag) {
+            if (minPrice == DBL_MAX) {
+                curtPosi += CMax * Dave;
+                sprintf(buf, format, curtPosi);
+                cout << buf;
+                return 0;
+            }
+            totalPrice += (curtPrice * (CMax - leftDis / Dave));
+            leftDis = CMax * Dave + curtPosi - minPriceDis;
+            curtPrice = minPrice;
+            curtPosi = minPriceDis;
+        }
     }
-    end:;
-
-    return 0;
+    printf("%.2f", totalPrice);
 }
