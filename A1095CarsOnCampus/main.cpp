@@ -1,101 +1,89 @@
 #include <bits/stdc++.h>
-// not ac, I cannot understand the question.
+// Don't understand the question. Again.
 using namespace std;
+int N, K;
+int Time2Second(const string& t) {
+    int hh, mm, ss;
+    sscanf(t.c_str(), "%d:%d:%d", &hh, &mm, &ss);
+    return hh * 3600 + mm * 60 + ss;
+}
 
-int N, K;  // N <= 10000 number of record; K <= 80000 the number of queries.
-struct Time {
-    int hour = 0, minute = 0, second = 0;
-    bool operator<(const Time& b) const {
-        return Time2Seconds(*this) < Time2Seconds(b);
-    }
-    bool operator>(const Time& b) const {
-        return Time2Seconds(*this) > Time2Seconds(b);
-    }
-    inline static int Time2Seconds(const Time& t) {
-        return t.hour * 3600 + t.minute * 60 + t.second;
-    }
-    static Time Seconds2Time(int s) {
-        Time t;
-        t.hour = s / 3600;
-        s %= 3600;
-        t.minute = s / 60;
-        s %= 60;
-        t.second = s;
-        return t;
-    }
-};
+string Second2Time(int s) {
+    char buf[50];
+    int hh = s / 3600;
+    s %= 3600;
+    int mm = s / 60;
+    s %= 60;
+    int ss = s;
+    sprintf(buf, "%02d:%02d:%02d", hh, mm, ss);
+    return buf;
+}
 
-struct Car {
-    Time in;
-    Time out;
-    int duration;
-    char plate[10];
-};
-struct CarCmp {
-    bool operator() (const Car& a, const Car& b) const {
-        return a.out < b.out;
-    }
-};
 struct CarRecord {
-    set<Time> in;
-    set<Time> out;
+    priority_queue<int> in;
+    priority_queue<int> out;
+//    vector <int> in;
+//    vector <int> out;
 };
-map<string, CarRecord> records;
-vector<Time> queries;
-vector<Car> querySet;
 
 int main() {
-    char buff[50];
-    Time t;
-    char strflag[10];
-    char plate[10];
     cin >> N >> K;
+    map<string, CarRecord> carRecords;
     for (int i = 0; i < N; ++i) {
-        cin.getline(buff, 50);
-        sscanf(buff, "%s %d:%d:%d %s", plate, &t.hour, &t.minute, &t.second, strflag);
-        if (strflag[0] == 'i') {
-            records[plate].in.insert(t);
+        string plate, time, status;
+        cin >> plate >> time >> status;
+        if (status == "in") {
+            carRecords[plate].in.push(Time2Second(time));
         }
         else {
-            records[plate].out.insert(t);
+            carRecords[plate].out.push(Time2Second(time));
         }
     }
+    int maxlen = -1;
+    vector<pair<int, int>> records;
+    map<string, int> ansCars;
+    for (auto &[plate, record]: carRecords) {
+        while (!record.in.empty() && !record.out.empty()) {
+//            int in = record.in.front(), out = record.out.front();
+//            record.in.erase(record.in.begin());
+//            record.out.erase(record.out.begin());
+            int in = record.in.top(), out = record.out.top();
+            if (in > out) return 1;
+            record.out.pop();
+            record.in.pop();
+            ansCars[plate] += out - in;
+            records.emplace_back(in, out);
+        }
+    }
+    sort(records.begin(), records.end());
     for (int i = 0; i < K; ++i) {
-        cin.getline(buff, 50);
-        sscanf(buff, "%d:%d:%d", &t.hour, &t.minute, &t.second);
-//        queries[i] = t;
-        queries.push_back(t);
+        string query;
+        cin >> query;
+        int time = Time2Second(query);
+        int cnt = 0;
+        for (auto &[a, b]: records){
+            if (time > a && time < b) {
+                cnt++;
+            }
+            if (time < a) break;
+        }
+        cout << cnt << '\n';
     }
-    for (auto& record: records) {
-        for (const auto& in: record.second.in) {
-            int min = INT_MAX;
-            auto x = record.second.out.end();
-            for (auto i = record.second.out.begin(); i != record.second.out.end(); ++i) {
-                int time = Time::Time2Seconds(*i);
-                if (time < min) {
-                    x = i;
-                    min = time;
-                }
-            }
-            if (x != record.second.out.end()) {
-                Car c;
-                c.in = in;
-                c.out = *x;
-                c.duration = Time::Time2Seconds(c.out) - Time::Time2Seconds(c.in);
-                strcpy(c.plate, record.first.c_str());
-                querySet.push_back(c);
-                record.second.out.erase(x);
-            }
+    int maxtime = -1;
+    vector<string> ansTime;
+    for (auto &[plate, time]: ansCars) {
+        if (time > maxtime) {
+            maxtime = time;
+            ansTime.clear();
+            ansTime.push_back(plate);
+        }
+        else if (time == maxtime) {
+            ansTime.push_back(plate);
         }
     }
-    for (const auto& query: queries) {
-        int ans = 0;
-        for (const auto&car: querySet) {
-            if (car.out > query && car.in < query)
-                ans++;
-        }
-        cout << ans << endl;
+    sort(ansTime.begin(), ansTime.end());
+    for (auto& s:ansTime) {
+        cout << s << ' ';
     }
-
-    return 0;
+    cout << Second2Time(maxtime);
 }
