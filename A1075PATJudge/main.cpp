@@ -1,102 +1,91 @@
 #include <bits/stdc++.h>
+// Accepted!
 using namespace std;
-struct Score {
-    int userNumber;
-    array<int, 5> scores = {-2, -2, -2, -2, -2};
-    int sum = -5;
-    bool flag = false;
+constexpr int MAXLEN = 100050;
+
+struct Student {
+    array<optional<int>, 6> scores;
+    int sum;
+    int perfectNum = 0;
+    int id;
+    bool pass = false;
+    bool operator<(const Student& other) const {
+        if (!pass) return false;
+        if (!other.pass) return true;
+        if (sum > other.sum) return true;
+        else if (sum == other.sum) {
+            if (perfectNum > other.perfectNum) return true;
+            else if (perfectNum == other.perfectNum) return id < other.id;
+        }
+        return false;
+    }
 };
-int N, K, M;
-array<Score, 10000> users;
-array<int, 5> maxScore;
-int score_sum(Score& a) {
-    int sum = 0;
-    for (int i = 0; i < K; ++i) {
-        if (a.scores[i] > 0)
-        {
-            sum += a.scores[i];
-            a.flag = true;
-        }
+array<Student, MAXLEN> students;
+void PrintScores(array<optional<int>, 6>& scores, int num) {
+    bool first = true;
+    for (int i = 1; i <= num; ++i) {
+        if (!first) cout << " ";
+        else first = false;
+        if (scores[i].has_value()) cout << scores[i].value();
+        else cout << '-';
     }
-    return sum;
-}
-bool cmp(Score& a, Score& b) {
-    int res1, res2;
-    if (a.sum < 0){
-        res1 = score_sum(a);
-        a.sum = res1;
-    }
-    else res1 = a.sum;
-    if (b.sum < 0) {
-        res2 = score_sum(b);
-        b.sum = res2;
-    }
-    else res2 = b.sum;
-    if (res1 > res2) return true;
-    if (res1 == res2) {
-        res1 = res2 = 0;
-        for (int i = 0; i < K; ++i) {
-            if (a.scores[i] == maxScore[i])
-                res1++;
-        }
-        for (int i = 0; i < K; ++i) {
-            if (b.scores[i] == maxScore[i])
-                res2++;
-        }
-        if (res1 > res2) return true;
-        if (res1 == res2) return a.userNumber < b.userNumber;
-    }
-    return false;
 }
 
 int main() {
+    int N, K, M;
     cin >> N >> K >> M;
-    for (int i = 0; i < K; ++i) {
-        cin >> maxScore[i];
+    array<int, 6> maxScores {};
+    for (int i = 1; i <= K; ++i) {
+        cin >> maxScores[i];
     }
     for (int i = 0; i < M; ++i) {
-        int userNum, problemNum, score;
-        cin >> userNum >> problemNum >> score;
-        if (users[userNum - 1].scores[problemNum - 1] < score) {
-            users[userNum - 1].scores[problemNum - 1] = score;
-            users[userNum - 1].userNumber = userNum;
+        int id, pid, score;
+        cin >> id >> pid >> score;
+        if (score == -1) score = 0;
+        else students[id].pass = true;
+        students[id].id = id;
+        auto &curtScore = students[id].scores[pid];
+        if (curtScore.has_value()) {
+            if (score > curtScore.value()) curtScore.value() = score;
         }
+        else curtScore = score;
     }
-    sort(users.begin(), users.begin() + N, cmp);
+    int num = 0;
+    for (int i = 0; i < MAXLEN; ++i) {
+        int cnt = 0;
+        if (!students[i].pass) continue;
+        for (int j = 1; j <= K; ++j) {
+            if (students[i].scores[j].has_value()) {
+                cnt++;
+                students[i].sum += students[i].scores[j].value();
+                if (students[i].scores[j].value() == maxScores[j]) students[i].perfectNum++;
+            }
+        }
+        if (!cnt) {
+           students[i].sum = -1;
+        }
+        else num++;
+    }
+    sort(students.begin(), students.end());
     char buf[50];
-    sprintf(buf, "%05d", users[0].userNumber);
-    cout << 1 << " " << buf << " " << users[0].sum << " ";
-    for (int j = 0; j < K; ++j) {
-        if (users[0].scores[j] >= 0)
-            cout << users[0].scores[j];
-        else if (users[0].scores[j] == -2)
-            cout << "-";
-        else cout << "0";
-        if (j != K - 1) cout << " ";
-    }
-    int rank = 1, offset = 1;
-    if (users[1].flag)
-        cout << endl;
-    for (int i = 1; i < N; ++i) {
-        if (!users[i].flag) continue;
-        sprintf(buf, "%05d", users[i].userNumber);
-        if (users[i].sum == users[i - 1].sum) {
+    int rank = 1;
+    int offset = 1;
+    const char* format = "%d %05d %d ";
+    sprintf(buf, format, rank, students[0].id, students[0].sum);
+    cout << buf;
+    PrintScores(students[0].scores, K);
+    cout << endl;
+    for (int i = 1; i < num; ++i) {
+        if (students[i - 1].sum == students[i].sum) {
             offset++;
         }
         else {
             rank += offset;
             offset = 1;
         }
-        cout << rank << " " << buf << " " << users[i].sum << " ";
-        for (int j = 0; j < K; ++j) {
-            if (users[i].scores[j] >= 0)
-                cout << users[i].scores[j];
-            else if (users[i].scores[j] == -2)
-                cout << "-";
-            else cout << "0";
-            if (j != K - 1) cout << " ";
-        }
-        if (i != N - 1) cout << endl;
+        sprintf(buf, format, rank, students[i].id, students[i].sum);
+        cout << buf;
+        PrintScores(students[i].scores, K);
+        cout << endl;
     }
-    return 0;
 }
