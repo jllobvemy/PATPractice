@@ -1,65 +1,58 @@
 #include <bits/stdc++.h>
-// Not Ac. 22/25
+// Accepted!
 using namespace std;
+constexpr int MAXLEN = 10e4 * 2;
 struct Node {
-    int data;
+    int index;
     int next;
-    int prev;
+    int data = INT_MAX;
+    int prior = INT_MAX;
+    bool operator<(const Node& other) const {
+        return prior < other.prior;
+    }
 };
+array<Node, MAXLEN> nodes;
+array<bool, MAXLEN> hashtable;
 
 int main() {
-    vector<Node> l;
-    l.resize(100001);
-    int beginAddr, N;
-    cin >> beginAddr >> N;
-    map<int, bool> dup;
+    int Start, N;
+    cin >> Start >> N;
     for (int i = 0; i < N; ++i) {
-        int addr;
-        cin >> addr;
-        cin >> l[addr].data >> l[addr].next;
-        if (l[addr].next != -1)
-            l[l[addr].next].prev = addr;
+        int index;
+        cin >> index;
+        nodes[index].index = index;
+        cin >> nodes[index].data >> nodes[index].next;
     }
-    bool firstDup = false;
-    int firstDupAddr = -1;
-    int lastDupAddr = -1;
-    for (int i = beginAddr; i != -1; i = l[i].next) {
-        if (dup[abs(l[i].data)]) {
-            if (!firstDup)  {
-                firstDupAddr = i;
-                firstDup = true;
-                lastDupAddr = i;
-            }
-            else {
-                l[lastDupAddr].next = i;
-                lastDupAddr = i;
-            }
-            l[l[i].prev].next = l[i].next;
-            if (l[i].next != -1) l[l[i].next].prev = l[i].prev;
+    if (nodes[Start].data == INT_MAX) return 1;
+    int cnt1 = 0, cnt2 = 0;
+    int p = 0;
+    for (int i = Start; i != -1; i = nodes[i].next) {
+        if (!hashtable[abs(nodes[i].data)]) {
+            hashtable[abs(nodes[i].data)] = true;
+            cnt1++;
+            nodes[i].prior = cnt1;
         }
         else {
-            dup[abs(l[i].data)] = true;
+            cnt2++;
+            nodes[i].prior = (1000000 + cnt2);
         }
     }
-    char buf[100];
-    for (int i = beginAddr; i != -1; i = l[i].next) {
-        if (l[i].next != -1)
-            sprintf(buf, "%05d %d %05d\n", i, l[i].data, l[i].next);
-        else {
-            sprintf(buf, "%05d %d %d\n", i, l[i].data, l[i].next);
-        }
+    sort(nodes.begin(), nodes.end());
+
+    for (int i = 0; i < cnt1; ++i) {
+        char buf[50];
+        if (i != cnt1 - 1)
+            sprintf(buf, "%05d %d %05d\n", nodes[i].index, nodes[i].data, nodes[i + 1].index);
+        else
+            sprintf(buf, "%05d %d -1\n", nodes[i].index, nodes[i].data);
         cout << buf;
     }
-    if (firstDupAddr == -1) {
-        return 0;
-    }
-    l[lastDupAddr].next = -1;
-    for (int i = firstDupAddr; i != -1; i = l[i].next) {
-        if (l[i].next != -1)
-            sprintf(buf, "%05d %d %05d\n", i, l[i].data, l[i].next);
-        else {
-            sprintf(buf, "%05d %d %d\n", i, l[i].data, l[i].next);
-        }
+    for (int i = cnt1; i < cnt2 + cnt1; i++) {
+        char buf[50];
+        if (i != cnt1 + cnt2 - 1)
+            sprintf(buf, "%05d %d %05d\n", nodes[i].index, nodes[i].data, nodes[i + 1].index);
+        else
+            sprintf(buf, "%05d %d -1\n", nodes[i].index, nodes[i].data);
         cout << buf;
     }
     return 0;
