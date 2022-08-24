@@ -1,61 +1,56 @@
 #include <iostream>
+#include <initializer_list>
 #include <algorithm>
+#include <string>
+#include <string.h>
+#include <thread>
+#include <cmath>
 #include <vector>
+#include <queue>
+#include <set>
+#include <stack>
+#include <unordered_map>
+#include <unordered_set>
+#define INF 0x3f3f3f3f
+
 using namespace std;
-const int inf = 99999999;
-struct station {
-    double price, dis;
-};
-bool cmp1(station a, station b) {
-    return a.dis < b.dis;
+const int maxn = 35;
+int n,pre[maxn],post[maxn],in[maxn],_index;
+bool flag = false;
+void Init()
+{
+    scanf("%d",&n);
+    for(int i =1 ;i <= n;i ++)
+        scanf("%d",pre+i);
+    for(int i = 1;i <= n;i ++)
+        scanf("%d",post+i);
 }
-int main() {
-    double cmax, d, davg;
-    int n;
-    scanf("%lf%lf%lf%d", &cmax, &d, &davg, &n);
-    vector<station> sta(n + 1);
-    sta[0] = {0.0, d};
-    for(int i = 1; i <= n; i++)
-        scanf("%lf%lf", &sta[i].price, &sta[i].dis);
-    sort(sta.begin(), sta.end(), cmp1);
-    double nowdis = 0.0, maxdis = 0.0, nowprice = 0.0, totalPrice = 0.0, leftdis = 0.0;
-    if(sta[0].dis != 0) {
-        printf("The maximum travel distance = 0.00");
-        return 0;
-    } else {
-        nowprice = sta[0].price;
+void Build_tree(int l1,int r1,int l2,int r2)
+{
+    if(l1 > r1) return  ;
+    if(l1 == r1)
+    {
+        in[++_index] = pre[l1]; return ;        //中序遍历中的子节点
     }
-    while(nowdis < d) {
-        maxdis = nowdis + cmax * davg;
-        double minPriceDis = 0, minPrice = inf;
-        int flag = 0;
-        for(int i = 1; i <= n && sta[i].dis <= maxdis; i++) {
-            if(sta[i].dis <= nowdis) continue;
-            if(sta[i].price < nowprice) {
-                totalPrice += (sta[i].dis - nowdis - leftdis) * nowprice / davg;
-                leftdis = 0.0;
-                nowprice = sta[i].price;
-                nowdis = sta[i].dis;
-                flag = 1;
-                break;
-            }
-            if(sta[i].price < minPrice) {
-                minPrice = sta[i].price;
-                minPriceDis = sta[i].dis;
-            }
-        }
-        if(flag == 0 && minPrice != inf) {
-            totalPrice += (nowprice * (cmax - leftdis / davg));
-            leftdis = cmax * davg - (minPriceDis - nowdis);
-            nowprice = minPrice;
-            nowdis = minPriceDis;
-        }
-        if(flag == 0 && minPrice == inf) {
-            nowdis += cmax * davg;
-            printf("The maximum travel distance = %.2f", nowdis);
-            return 0;
-        }
-    }
-    printf("%.2f", totalPrice);
+    int cnt = 0;
+    while(post[l2+cnt] != pre[l1+1]) cnt++;
+    cnt++;                                     //包括pre[l1+1]本身，所以要+1
+    if(l1+cnt == r1)               //只包含当前子节点，并且区间中只有此一个节点
+        flag = true;
+
+    Build_tree(l1+1,l1+cnt,l2,l2+cnt-1);         //遍历左子区间
+    in[++_index] = pre[l1];                     //中序遍历中的根节点
+    Build_tree(l1+cnt+1,r1,l2+cnt,r2-1);        //遍历右子区间
+}
+int main()
+{
+    Init();
+    Build_tree(1,n,1,n);
+    if(flag)
+        printf("No\n");
+    else
+        printf("Yes\n");
+    for(int i = 1;i <= n;i ++)
+        printf("%d%c",in[i],i==n?'\n':' ');
     return 0;
 }

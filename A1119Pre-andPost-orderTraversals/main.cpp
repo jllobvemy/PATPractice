@@ -18,7 +18,8 @@ Node* Create(int preleft, int preright, int postleft, int postright) {
     int cnt = 0;
     while (PostOrderRaw[postleft + cnt] != PreOrderRaw[preleft + 1]) cnt++;
     cnt++;
-    if (cnt == 1 && preleft + cnt == preright) Unique = false;
+    if (preleft + cnt == preright)
+        Unique = false;
     ret->left = Create(preleft + 1, preleft + cnt, postleft, postleft + cnt - 1);
     ret->right = Create(preleft + cnt + 1, preright, postleft + cnt, postright - 1);
     return ret;
