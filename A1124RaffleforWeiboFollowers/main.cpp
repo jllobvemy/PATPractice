@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-// 15/20
+// Accepted!
 using namespace std;
 
 int main() {
@@ -7,25 +7,24 @@ int main() {
     cin >> M >> N >> S;
     unordered_set<string> winner;
     vector<string> ans;
-    int supply = 0;
+    int curtPosi = 0;
     for (int i = 1; i <= M; ++i) {
         string person;
         cin >> person;
-        int offset = 0;
-        if (supply || i == S || (i > S && (i - S) % N == 0)) {
-            if (supply > 0 && !(i == S || (i > S && (i - S) % N == 0))) supply--;
+        if (i < S) continue;
+        if (curtPosi % N == 0) {
             while (winner.find(person) != winner.end()) {
-                offset++;
-                if (offset % N == 0) supply++;
-                if (i + offset > M) break;
                 cin >> person;
+                i++;
+                curtPosi = 0;
+                if (i > M) break;
             }
             if (winner.find(person) == winner.end()) {
-                winner.insert(person);
                 ans.push_back(person);
+                winner.insert(person);
             }
         }
-        i += offset;
+        curtPosi++;
     }
     if (winner.empty()) {
         cout << "Keep going..." << endl;
