@@ -1,56 +1,46 @@
-#include <iostream>
-#include <initializer_list>
-#include <algorithm>
-#include <string>
-#include <string.h>
-#include <thread>
-#include <cmath>
-#include <vector>
-#include <queue>
-#include <set>
-#include <stack>
-#include <unordered_map>
-#include <unordered_set>
-#define INF 0x3f3f3f3f
-
+#include<bits/stdc++.h>
 using namespace std;
-const int maxn = 35;
-int n,pre[maxn],post[maxn],in[maxn],_index;
-bool flag = false;
-void Init()
-{
-    scanf("%d",&n);
-    for(int i =1 ;i <= n;i ++)
-        scanf("%d",pre+i);
-    for(int i = 1;i <= n;i ++)
-        scanf("%d",post+i);
-}
-void Build_tree(int l1,int r1,int l2,int r2)
-{
-    if(l1 > r1) return  ;
-    if(l1 == r1)
-    {
-        in[++_index] = pre[l1]; return ;        //中序遍历中的子节点
-    }
-    int cnt = 0;
-    while(post[l2+cnt] != pre[l1+1]) cnt++;
-    cnt++;                                     //包括pre[l1+1]本身，所以要+1
-    if(l1+cnt == r1)               //只包含当前子节点，并且区间中只有此一个节点
-        flag = true;
+const int N=1e4+9;
+int arr[N];
+map<int,int>mp;
+int main(){
 
-    Build_tree(l1+1,l1+cnt,l2,l2+cnt-1);         //遍历左子区间
-    in[++_index] = pre[l1];                     //中序遍历中的根节点
-    Build_tree(l1+cnt+1,r1,l2+cnt,r2-1);        //遍历右子区间
-}
-int main()
-{
-    Init();
-    Build_tree(1,n,1,n);
-    if(flag)
-        printf("No\n");
-    else
-        printf("Yes\n");
-    for(int i = 1;i <= n;i ++)
-        printf("%d%c",in[i],i==n?'\n':' ');
+    int n,m;
+    cin>>n>>m;
+    for(int i=1;i<=m;i++){
+
+        cin>>arr[i];
+        mp[arr[i]]++;
+    }
+
+    while(n--){
+
+        int a,b;
+        cin>>a>>b;
+        int p;
+        for(int i=1;i<=m;i++){
+
+            p=arr[i];
+            if((p>a&&p<=b)||(p>b&&p<=a)||p==a||p==b)break;
+        }
+        if(mp[a]==0&&mp[b]==0){
+
+            printf("ERROR: %d and %d are not found.\n",a,b);
+        }
+        else if(mp[a]==0||mp[b]==0){
+
+            printf("ERROR: %d is not found.\n",mp[a]==0?a:b);
+        }
+        else if(p==a||p==b){
+
+            if(p==a)
+            printf("%d is an ancestor of %d.\n",p,b);
+            else if(p==b)
+            printf("%d is an ancestor of %d.\n",p,a);
+        }
+        else printf("LCA of %d and %d is %d.\n",a,b,p);
+    }
+
+
     return 0;
 }
